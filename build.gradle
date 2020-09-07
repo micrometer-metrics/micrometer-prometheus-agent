@@ -29,9 +29,11 @@ shadowJar {
     archiveClassifier = null
     dependencies {
         include(dependency('io.micrometer:'))
+        include(dependency('io.prometheus:'))
     }
     relocate 'io.micrometer.core', 'io.micrometer.shaded.micrometer.core'
     relocate 'io.micrometer.prometheus', 'io.micrometer.shaded.micrometer.prometheus'
+    relocate 'io.prometheus', 'io.micrometer.shaded.prometheus'
 }
 
 jar.enabled = false
@@ -46,7 +48,7 @@ publishing {
                         .dependencies
                         .dependency
                         .findAll {
-                            ['micromter-registry-prometheus', 'micrometer-core'].contains(it.artifactId.text())
+                            ['micromter-registry-prometheus', 'micrometer-core', 'simpleclient_common'].contains(it.artifactId.text())
                         }
                         .each { it.parent().remove(it) }
             }
