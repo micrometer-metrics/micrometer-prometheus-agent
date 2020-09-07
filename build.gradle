@@ -1,5 +1,7 @@
 plugins {
     id 'java-library'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'maven-publish'
 }
 
 repositories {
@@ -16,8 +18,38 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Agent-Class': 'io.micrometer.prometheus.agent.PrometheusAgent',
-                'Premain-Class': 'io.micrometer.prometheus.agent.PrometheusAgent'
+                'Agent-Class': 'io.micrometer.agent.prometheus.PrometheusAgent',
+                'Premain-Class': 'io.micrometer.agent.prometheus.PrometheusAgent'
         )
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.compileClasspath]
+    archiveClassifier = null
+    dependencies {
+        include(dependency('io.micrometer:'))
+    }
+    relocate 'io.micrometer.core', 'io.micrometer.shaded.micrometer.core'
+    relocate 'io.micrometer.prometheus', 'io.micrometer.shaded.micrometer.prometheus'
+}
+
+jar.enabled = false
+jar.dependsOn shadowJar
+publishing {
+    publications {
+        withType(MavenPublication) {
+            artifact(shadowJar)
+
+            pom.withXml {
+                asNode()
+                        .dependencies
+                        .dependency
+                        .findAll {
+                            ['micromter-registry-prometheus', 'micrometer-core'].contains(it.artifactId.text())
+                        }
+                        .each { it.parent().remove(it) }
+            }
+        }
     }
 }
