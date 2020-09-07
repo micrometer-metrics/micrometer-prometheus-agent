@@ -11,8 +11,8 @@ repositories {
 dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus:latest.release'
 
-    implementation 'io.javalin:javalin:latest.release'
-    implementation 'ch.qos.logback:logback-classic:latest.release'
+    testImplementation 'io.javalin:javalin:latest.release'
+    testRuntimeOnly 'ch.qos.logback:logback-classic:latest.release'
 }
 
 jar {
@@ -25,7 +25,7 @@ jar {
 }
 
 shadowJar {
-    configurations = [project.configurations.compileClasspath]
+    configurations = [project.configurations.compileClasspath, project.configurations.compileOnly]
     archiveClassifier = null
     dependencies {
         include(dependency('io.micrometer:'))

@@ -1,6 +1,6 @@
 package io.micrometer.agent.prometheus;
 
-import io.javalin.Javalin;
+import com.sun.net.httpserver.HttpServer;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmHeapPressureMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
@@ -10,7 +10,10 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.instrument.Instrumentation;
+import java.net.InetSocketAddress;
 
 public class PrometheusAgent {
     private static final PrometheusMeterRegistry meterRegistry =
@@ -36,10 +39,20 @@ public class PrometheusAgent {
     }
 
     private static void runPrometheusScrapeEndpoint() {
-        Javalin app = Javalin.create().start(7001);
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress(7001), 0);
+            server.createContext("/prometheus", httpExchange -> {
+                String response = meterRegistry.scrape();
+                httpExchange.getResponseHeaders().set("Content-Type", TextFormat.CONTENT_TYPE_004);
+                httpExchange.sendResponseHeaders(200, response.length());
+                OutputStream os = httpExchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            });
 
-        app.get("/prometheus", ctx -> ctx
-                .header("Content-Type", TextFormat.CONTENT_TYPE_004)
-                .result(meterRegistry.scrape()));
+            new Thread(server::start).start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
