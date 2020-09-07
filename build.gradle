@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.micrometer:micrometer-registry-prometheus:latest.release'
+
+    implementation 'io.javalin:javalin:latest.release'
+    implementation 'ch.qos.logback:logback-classic:latest.release'
+}
