@@ -1,2 +1,0 @@
-Agent-Class: io.micrometer.prometheus.agent.PrometheusAgent
-Premain-Class: io.micrometer.prometheus.agent.PrometheusAgent

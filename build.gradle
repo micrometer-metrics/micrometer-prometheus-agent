@@ -12,3 +12,12 @@ dependencies {
     implementation 'io.javalin:javalin:latest.release'
     implementation 'ch.qos.logback:logback-classic:latest.release'
 }
+
+jar {
+    manifest {
+        attributes(
+                'Agent-Class': 'io.micrometer.prometheus.agent.PrometheusAgent',
+                'Premain-Class': 'io.micrometer.prometheus.agent.PrometheusAgent'
+        )
+    }
+}
