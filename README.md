@@ -1,3 +1,5 @@
+# micrometer-prometheus-agent is no longer actively maintained by VMware, Inc.
+
 ## Prometheus Agent
 
 Build the agent with `./gradlew build`.
